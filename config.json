@@ -2,14 +2,12 @@
     "aiModels": [
         {
             "type": "ollama",
-            "model": "qwen2.5-coder:0.5b",
+            "model": "qwen2.5-coder:1.5b",
             "endpoint": "http://localhost:11434",
-            "headers": {
-                
-            },
-            "rateLimit": 1,
+            "headers": {},
+            "rateLimit": 3,
             "promt": "promts/qwen.md",
-            "context": 2048
+            "context": 20480
         }
     ],
     "codeSpaces": [

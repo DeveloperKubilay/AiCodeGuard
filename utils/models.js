@@ -16,28 +16,31 @@ export async function loadModels() {
 }
 
 
-export async function splitePromts(promts, limit){
+export function splitePromts(promts, limit) {
+  if (!Array.isArray(promts) || promts.length === 0) return [];
   const splited = [[]];
-  for(const promt of promts){
-    if(limit > 0){
-      console.log(promt)
-      for(let i=0; i < promt.length; i += limit){
+  let currentLength = 0;
+  for (const promt of promts) {
+    if (limit > 0) {
+      currentLength++;
+      if (currentLength > limit) {
+        splited.push([promt]);
+        currentLength = 1;
+        continue;
       }
-    } else {
-      splited[splited.length - 1].push(promt);
     }
+    splited[splited.length - 1].push(promt);
   }
-
   return splited;
 }
 
 export function filesToPromts(promt, Allfiles) {
   const data = Allfiles.map(files => (
     {
-      role: 'user', 
-      content: `${promt}\n\n${files.map(file =>{
+      role: 'user',
+      content: `${promt}\n\n${files.map(file => {
         return `File: ${file.path}\n${fs.readFileSync(file.path, 'utf-8')}`;
-      }).join('\n\n')}`
+      }).join('\n\n----------------------------------------------------------------\n\n')}`
     }));
-    return data;
+  return data;
 }
