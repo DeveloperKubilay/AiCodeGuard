@@ -3,6 +3,7 @@ const config = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
 
 import { loadModels, filesToPromts, splitePromts } from './utils/models.js';
 import { getFiles, SpliteCode } from './utils/fileSystem.js';
+import { processBatchesSequential } from './utils/util.js';
 
 async function main() {
   const models = await loadModels();
@@ -20,11 +21,17 @@ async function main() {
       }
       console.log(`Using model: ${tempModel}`);
       console.log(`Code Space: ${codeSpace}`);
-      const chat = (...messages) => modelSystem.generateResponse(aiModel, ...messages);
-      const promt = fs.readFileSync(aiModel.promt, 'utf-8');
-      const files = SpliteCode(Allfiles, (aiModel.context || 1024*1024*1024) - promt.length - 4);
+      const chat = (messages) => modelSystem.generateResponse(aiModel, messages);
+      let promt = fs.readFileSync(aiModel.promt, 'utf-8');
+      promt = promt
+        .replace("{FUNCTIONS}", modelSystem.tools.map(x => x.function.name).join(', '))
+        .replace("{ALLFILES}", Allfiles.map(x => x.path).join('\n'));
+      const files = SpliteCode(Allfiles, (aiModel.context || 1024 * 1024 * 1024) - promt.length - 4);
       const promts = filesToPromts(promt, files);
       const splitedPromts = splitePromts(promts, aiModel.rateLimit || 0);
+
+      const responses = await processBatchesSequential(chat, splitedPromts);
+      console.log(responses);
 
     }
 
