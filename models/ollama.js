@@ -1,4 +1,7 @@
 import ollama from 'ollama';
+import path from 'path';
+import c from 'ansi-colors';
+import fs from 'fs';
 
 export default async () => {
   const list = await ollama.list();
@@ -44,10 +47,9 @@ const tools = [
       description: 'No issues found in the file.',
       parameters: {
         type: 'object',
-        required: ['path', "description"],
+        required: ['path'],
         properties: {
           path: { type: 'string', description: 'The exact absolute file path to the file containing the issue. Do NOT use function names. Copy the path from the "File:" header.' },
-          description: { type: 'string', description: 'Description of the issue found in the file' }
         }
       }
     }
@@ -59,7 +61,7 @@ export async function getModels() {
   return { models: models.map(m => m.model), type: 'ollama', generateResponse, tools };
 }
 
-export async function generateResponse(model, messages) {
+export async function generateResponse(model, messages, options = {}) {
   if (!Array.isArray(messages)) messages = [messages];
   const response = await ollama.chat({
     model: model.model,
@@ -67,13 +69,25 @@ export async function generateResponse(model, messages) {
     tools: tools
   });
 
-  if (response.message.tool_calls) {
-    for (const call of response.message.tool_calls) {
-      console.log(`Tool called: ${call.function.name} with arguments: ${JSON.stringify(call.function.arguments)}`);
+
+  if (!response.message.tool_calls) return false;
+
+  for (const call of response.message.tool_calls) {
+
+    const result = path.relative(
+      path.join(options.codeSpace || ""),
+      call.function.arguments.path
+    )
+
+    if (call.function.name == "SAFE") console.log(c.green(`File is safe: ${result}`));
+    else if (call.function.name == "WARN") console.log(c.yellow(`Warning in file: ${result}\n${call.function.arguments.description}`));
+    else if (call.function.name == "CRITICAL") console.log(c.red(`Critical issue in file: ${result}\n${call.function.arguments.description}`));
+
+    if (call.function.name != "SAFE") {
+      fs.appendFileSync("log.txt", `Issue found in file: ${result}\nDescription: ${call.function.arguments.description}\n\n`);
     }
-  } else {
-    console.log(response.message.content);
+
   }
 
-  return;
+  return response.message.tool_calls.some(call => call.function.name != "SAFE");
 }
