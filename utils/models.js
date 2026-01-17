@@ -16,7 +16,7 @@ export async function loadModels() {
 }
 
 
-export function splitePromts(promts, limit) {
+export function splitePromts(promts, limit, options) {
   if (!Array.isArray(promts) || promts.length === 0) return [];
   const splited = [[]];
   let currentLength = 0;
