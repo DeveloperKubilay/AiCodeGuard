@@ -38,9 +38,7 @@ export function filesToPromts(promt, Allfiles) {
   const data = Allfiles.map(files => (
     {
       role: 'user',
-      content: `${promt}\n\n${files.map(file => {
-        return `File: ${file.path}\n${fs.readFileSync(file.path, 'utf-8')}`;
-      }).join('\n\n----------------------------------------------------------------\n\n')}`
+      content: `${promt}\nFILE PATH: ${files.path}\n\n${fs.readFileSync(files.path, 'utf-8')}`
     }));
   return data;
 }
