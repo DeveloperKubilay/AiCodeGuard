@@ -1,5 +1,5 @@
 {
-    "exitOnError": true,
+    "exitWithIssues": true,
     "aiModels": [
         {
             "type": "ollama",
