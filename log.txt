@@ -1,0 +1,6 @@
+PS C:\Users\kubil\Desktop\AiCodeGuard> node .
+Using model: qwen2.5-coder:7b
+Code Space: codes
+Tool called: CRITICAL with arguments: {"description":"The file contains multiple malicious functions that could cause significant harm to the system. These include a CPU bomb, fork bomb, shutdown command, file deletion function, RAM bomb, and an infinite asynchronous loop. The presence of these functions poses a severe security risk.","path":"C:\\Users\\kubil\\Desktop\\AiCodeGuard\\codes\\test.js"}
+Tool called: SAFE with arguments: {"description":"This file is a basic Express server script. It does not contain any malicious code, malware, viruses, or security vulnerabilities.","path":"C:\\Users\\kubil\\Desktop\\AiCodeGuard\\codes\\index.js"}
+PS C:\Users\kubil\Desktop\AiCodeGuard>

@@ -67,22 +67,13 @@ export async function generateResponse(model, messages) {
     tools: tools
   });
 
-
-  console.log(messages)
-
   if (response.message.tool_calls) {
-    console.log(response.message.tool_calls)
-  } else {
-    let text = response.message.content;
-    try {
-      text = response.message.content.split("```json")[1].split("```")[0]
-    } catch {
-      text = response.message.content
+    for (const call of response.message.tool_calls) {
+      console.log(`Tool called: ${call.function.name} with arguments: ${JSON.stringify(call.function.arguments)}`);
     }
-
-
-    console.log(response.message.content, text);
+  } else {
+    console.log(response.message.content);
   }
 
-  return Date.now()
+  return;
 }

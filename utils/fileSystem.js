@@ -15,21 +15,3 @@ export function getFiles(dir) {
     });
     return results;
 }
-
-export function SpliteCode(files, kMaxLength) {
-    let currentLength = 0;
-    let currentChunk = [[]];
-
-    for (const file of files) {
-        const fileMaxLength = kMaxLength-file.path.length-15;
-        if(file.length > fileMaxLength) continue;
-        if (currentLength + file.length > fileMaxLength) {
-            currentChunk.push([]);
-            currentLength = 0;
-        }
-        currentChunk[currentChunk.length - 1].push(file);
-        currentLength += file.length;
-    }
-
-    return currentChunk;
-}
