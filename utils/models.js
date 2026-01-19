@@ -6,9 +6,11 @@ export async function loadModels() {
   await Promise.all(
     files.map(async file => {
       if (file.endsWith('.js')) {
-        const { getModels } = await import(`../models/${file}`);
-        const data = await getModels();
-        models[data.type] = data;
+        const module = await import(`../models/${file}`);
+        const ModelClass = module.default;
+        if (ModelClass && ModelClass.type) {
+          models[ModelClass.type] = ModelClass;
+        }
       }
     })
   );

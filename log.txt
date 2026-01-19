@@ -4,3 +4,20 @@ Description: The file contains several highly malicious functions that could cau
 Issue found in file: codes\test.js
 Description: The file contains several malicious functions that can cause significant harm to the system, including CPU bombs, fork bombs, PC shutdowns, and DoS attacks. These functions are extremely dangerous and should be removed immediately.
 
+Issue found in file: test.js
+Description: The file contains several malicious functions that can cause severe security risks, including CPU bombs, fork bombs, shutdown commands, and dangerous operations like deleting everything on the system. These functions are extremely dangerous and must be corrected or removed immediately.
+
+Issue found in file: test.js
+Description: ```json
+{
+  "name": "CRITICAL",
+  "arguments": {
+    "path": "C:\\Users\\kubil\Desktop\\AiCodeGuard\\codes\\test.js",
+    "description": "The file contains malicious code, such as a CPU bomb and a fork bomb. Both of these functions spawn processes that could potentially cause system instability or shutdowns."
+  }
+}
+```
+
+Issue found in file: index.js
+Description: A critical security risk in the code. The application is exposing sensitive data without proper encryption and handling.
+

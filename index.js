@@ -13,19 +13,30 @@ async function main() {
     const Allfiles = getFiles(codeSpace)
 
     for (const aiModel of config.aiModels) {
-      const modelSystem = models[aiModel.type] || { models: [] };
-      const tempModel = modelSystem.models.find(m => m === aiModel.model)
+      const ModelClass = models[aiModel.type];
 
-      if (!tempModel) {
-        console.warn(c.red(`Model ${aiModel} not found! Skipping...`));
+      if (!ModelClass) {
+        console.warn(c.red(`Model Type ${aiModel.type} not found! Skipping...`));
         continue;
       }
+
+      const modelInstance = new ModelClass(aiModel);
+      const availableModels = await modelInstance.getModels();
+      const tempModel = availableModels.find(m => m === aiModel.model);
+
+      if (!tempModel) {
+        console.warn(c.red(`Model ${aiModel.model} not found! Skipping...`));
+        continue;
+      }
+
       console.log(c.cyan(`Using model: ${tempModel}`));
       console.log(c.bold.yellow(`Code Space: ${codeSpace}`));
-      const chat = (messages) => modelSystem.generateResponse(aiModel, messages);
+      
+      const chat = (messages, options) => modelInstance.generateResponse(messages, options);
+      
       let promt = fs.readFileSync(aiModel.promt, 'utf-8');
       promt = promt
-        .replace("{FUNCTIONS}", modelSystem.tools.map(x => x.function.name).join(', '))
+        .replace("{FUNCTIONS}", modelInstance.tools.map(x => x.function.name).join(', '))
       const promts = filesToPromts(promt, Allfiles);
       const splitedPromts = splitePromts(promts, aiModel.rateLimit || 0);
 
