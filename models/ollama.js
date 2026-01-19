@@ -84,12 +84,27 @@ export default class OllamaModel {
         const content = response.message.content || "";
         const toolCalls = [];
         
+        // XML-like support
         const xmlRegex = /<function\s+name="(\w+)"\s+arguments='(.*?)'\s*\/>/g;
         let match;
         while ((match = xmlRegex.exec(content)) !== null) {
           try { toolCalls.push({ function: { name: match[1], arguments: JSON.parse(match[2]) } }); } catch (e) {}
         }
-
+        
+        // JSON support
+        if (toolCalls.length === 0) {
+           const jsonRegex = /```json\s*(\{[\s\S]*?\})\s*```/g;
+           let jsonMatch;
+            while ((jsonMatch = jsonRegex.exec(content)) !== null) {
+              try {
+                  const jsonData = JSON.parse(jsonMatch[1]);
+                  if (jsonData.name && jsonData.arguments) {
+                      toolCalls.push({ function: jsonData });
+                  }
+              } catch (e) {}
+            }
+        }
+        
         if (toolCalls.length === 0) {
           const pathRegex = /FILE PATH: (.*?)(\n|$)/;
           const filePath = (messages[0].content.match(pathRegex) || [])[1]?.trim() || "Unknown";
