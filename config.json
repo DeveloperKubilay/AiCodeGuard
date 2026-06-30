@@ -1,5 +1,5 @@
 {
-    "exitWithIssues": true,
+    "exitOnError": true,
     "aiModels": [
         {
             "type": "ollama",
@@ -11,6 +11,7 @@
             "context": 20480
         }
     ],
+    "usegit":true,
     "codeSpaces": [
         "codes"
     ]

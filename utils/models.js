@@ -37,10 +37,15 @@ export function splitePromts(promts, limit, options) {
 }
 
 export function filesToPromts(promt, Allfiles) {
+  const modeNotes = {
+    full: 'Review the full current file content.',
+    diff: 'Review only this git diff from the last commit to the current working tree. Focus on newly introduced risks.',
+    new: 'Review this full content as a newly added untracked file.'
+  };
   const data = Allfiles.map(files => (
     {
       role: 'user',
-      content: `${promt}\nFILE PATH: ${files.path}\n\n${fs.readFileSync(files.path, 'utf-8')}`
+      content: `${promt}\nFILE PATH: ${files.path}\nSOURCE MODE: ${files.mode || 'full'}\nREVIEW SCOPE: ${modeNotes[files.mode || 'full']}\n\n${files.content ?? fs.readFileSync(files.path, 'utf-8')}`
     }));
   return data;
 }

@@ -2,7 +2,7 @@ import fs from 'fs';
 const config = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
 
 import { loadModels, filesToPromts, splitePromts } from './utils/models.js';
-import { getFiles } from './utils/fileSystem.js';
+import { getReviewTargets } from './utils/fileSystem.js';
 import { processBatchesSequential } from './utils/util.js';
 import c from 'ansi-colors';
 
@@ -10,7 +10,23 @@ async function main() {
   const models = await loadModels();
 
   for (const codeSpace of config.codeSpaces) {
-    const Allfiles = getFiles(codeSpace)
+    const reviewTargets = getReviewTargets(codeSpace, { useGit: config.usegit === true });
+    const allFiles = reviewTargets.items;
+
+    console.log(c.bold.yellow(`Code Space: ${codeSpace}`));
+    if (reviewTargets.mode === 'git') {
+      console.log(c.cyan(`Scan mode: git diff against HEAD`));
+    } else {
+      console.log(c.cyan(`Scan mode: full scan`));
+      if (reviewTargets.fallbackReason) {
+        console.log(c.yellow(`Git fallback: ${reviewTargets.fallbackReason}`));
+      }
+    }
+
+    if (allFiles.length === 0) {
+      console.log(c.green.bold(`No changed files found in code space: ${codeSpace}`));
+      continue;
+    }
 
     for (const aiModel of config.aiModels) {
       const ModelClass = models[aiModel.type];
@@ -30,14 +46,13 @@ async function main() {
       }
 
       console.log(c.cyan(`Using model: ${tempModel}`));
-      console.log(c.bold.yellow(`Code Space: ${codeSpace}`));
       
       const chat = (messages, options) => modelInstance.generateResponse(messages, options);
       
       let promt = fs.readFileSync(aiModel.promt, 'utf-8');
       promt = promt
         .replace("{FUNCTIONS}", modelInstance.tools.map(x => x.function.name).join(', '))
-      const promts = filesToPromts(promt, Allfiles);
+      const promts = filesToPromts(promt, allFiles);
       const splitedPromts = splitePromts(promts, aiModel.rateLimit || 0);
 
       const results = await processBatchesSequential(chat, splitedPromts, {
